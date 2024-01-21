@@ -16,7 +16,7 @@ const Leaderboard = ({ leaderboardlist,getLeaderBoard }) => {
   
     return (
      
-        <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <div className=" bg-white flex flex-col items-center justify-center">
       <div className="max-w-screen-md w-full mx-auto p-6 bg-white rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold flex items-center mb-4">
           <span className="mr-2">

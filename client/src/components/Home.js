@@ -57,6 +57,11 @@ function Home() {
     useEffect(()=> {
 const storedWinner = localStorage.getItem('winner')
 if (storedWinner) setWinnerAddress(storedWinner);
+const storedPrize = localStorage.getItem('prize')
+if (storedPrize) setWinnerPrize(storedPrize);
+
+
+
     })
   
 
@@ -264,7 +269,7 @@ if (storedWinner) setWinnerAddress(storedWinner);
               wins: parseInt(entry[1], 10),
           }));
           setLeaderboard(formattedLeaderboard);
-           console.log(leaderboardlist,formattedLeaderboard) 
+          //  console.log(leaderboardlist,formattedLeaderboard) 
       } catch (error) {
           console.error("Error fetching leaderboard:", error);
       }
@@ -329,6 +334,7 @@ if (storedWinner) setWinnerAddress(storedWinner);
             setWinnerAddress(winnerEvent.returnValues.winner);
             setWinnerPrize(Web3.utils.fromWei(winnerEvent.returnValues.prize, 'ether'));
             localStorage.setItem("winner",winnerEvent.returnValues.winner);
+            localStorage.setItem("prize", Web3.utils.fromWei(winnerEvent.returnValues.prize, 'ether'));
             return winnerEvent.returnValues.winner;
           }
         }
@@ -366,6 +372,7 @@ const ownerbalance = async () => {
         setWinnerAddress(null);
         setWinnerPrize(0);
         localStorage.removeItem("winner")
+        localStorage.removeItem("prize")
       } catch (error) {
         console.error('Error claiming prize:', error);
       }
@@ -457,7 +464,7 @@ return(
         <div>
               {prize !== null ? (
                 <p className='text-center'>
-                  {prize ? `${prize} Matic was paid to ${winner}` : ' ongoing round'}
+                  {prize ? `${prize} Matic was paid to ${winner}` : ' active round'}
                 </p>
               ) : (
                 <div className="flex items-center justify-center">

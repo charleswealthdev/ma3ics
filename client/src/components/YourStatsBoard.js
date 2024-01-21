@@ -26,9 +26,9 @@ const YourStatsBoard = ({
   };
 
   return (
-    <div className="flex flex-col lg:flex-row bg-white p-8 rounded-md shadow-lg space-y-4 lg:space-y-0">
+    <div className="flex flex-col lg:flex-row bg-white p-6 rounded-md shadow-lg space-y-4 lg:space-y-0">
       {/* Leaderboard component on the left */}
-      <div className="lg:w-1/2 p-4 rounded-md bg-blue-100">
+      <div className="lg:w-1/2 p-1 rounded-md bg-blue-100">
         <h2 className="text-xl font-bold mb-4 text-center">LEADERBOARD</h2>
         <Leaderboard leaderboardlist={leaderdoardlist} getLeaderBoard={getLeaderBoard} />
       </div>
@@ -56,9 +56,7 @@ const YourStatsBoard = ({
           </div>
 
           <div className="flex flex-wrap">
-            {showParticipants && <ParticipantsCard players={players} />
-             }
-
+            {showParticipants && <ParticipantsCard players={players} />}
             {showWinners && <Winners pastWinners={pastWinners} />}
           </div>
         </div>
@@ -68,7 +66,7 @@ const YourStatsBoard = ({
 };
 
 const statsItem = (title, value, bgColor) => (
-  <div className={`rounded-full ${bgColor} p-6 flex items-center justify-center`}>
+  <div className={`rounded-full ${bgColor} p-6 flex items-center justify-center sm:mb-4`}>
     <div className="text-center">
       <p className="text-xl font-semibold mb-2 text-white">{title}</p>
       <p className="text-2xl">{value}</p>
