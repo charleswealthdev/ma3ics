@@ -10,16 +10,69 @@ contract Lottery {
     mapping(address => Player) public Tplayer;
     address public winner;
     uint public prize;
-    uint public constant amount = 0.05 ether;
+    uint public constant amount = 0.1 ether;
     uint public TVolume;
     uint public TX;
-
+    uint private commission;
+    uint private  commissionvalue;
+   
+ 
     struct Player {
         uint timeplayed;
         uint wins;
         uint losses;
+        uint score;
     }
 
+    // Add a new struct to represent leaderboard entry
+struct LeaderboardEntry {
+    address playerAddress;
+    uint wins;
+}
+
+// Modify the leaderboard declaration
+LeaderboardEntry[] public leaderboard;
+
+// ...
+
+// Modify the updateLeaderboard function
+// Modify the updateLeaderboard function
+function updateLeaderboard() internal {
+
+    // Clear the leaderboard
+    delete leaderboard;
+
+    // Populate the leaderboard with all players
+    for (uint i = 0; i < players.length; i++) {
+        leaderboard.push(LeaderboardEntry({
+            playerAddress: players[i],
+            wins: Tplayer[players[i]].wins
+        }));
+    }
+
+    // Sorting logic (bubble sort for simplicity)
+    for (uint i = 0; i < leaderboard.length; i++) {
+        for (uint j = 0; j < leaderboard.length - i - 1; j++) {
+            if (leaderboard[j].wins < leaderboard[j + 1].wins) {
+                // Use a temporary variable to perform the swap
+                LeaderboardEntry memory temp = leaderboard[j];
+                leaderboard[j] = leaderboard[j + 1];
+                leaderboard[j + 1] = temp;
+            }
+        }
+    }
+}
+
+
+// Modify the getLeaderboard function
+function getLeaderboard() public view returns (LeaderboardEntry[] memory) {
+    return leaderboard;
+}
+
+
+constructor(){
+     manager =msg.sender;
+}
     modifier onlyManager() {
         require(msg.sender == manager, "Only manager can call this function");
         _;
@@ -32,15 +85,20 @@ contract Lottery {
    
     event WinnerPicked(address winner, uint256 prize);
 
-    constructor() {
-        manager = msg.sender;
-    }
 
+    
+function setcommission(uint _commission) onlyManager public {
+commission = _commission;
+}
 
 function getBalance() public view returns (uint) {
         return address(this).balance;
     }
 
+    function OwnerBalance() public view onlyManager returns(uint)  {
+
+        return  manager.balance;
+    }
     // function getTV() public view returns(uint){
     //     return TVolume;
     // }
@@ -54,6 +112,10 @@ function getBalance() public view returns (uint) {
 //   function timesWon() public view returns(uint){
 //         return Tplayer[msg.sender].wins;
 //     }
+
+
+
+
 
      function getPlayerStats(address player) public view returns (uint wins, uint losses, uint timePlayed) {
         Player storage playerInfo = Tplayer[player];
@@ -94,21 +156,28 @@ function getBalance() public view returns (uint) {
 
         prize = address(this).balance;
         winners.push(winner);
+        updateLeaderboard();
         emit WinnerPicked(winner, prize);
 
         // Reset the game
         resetGame();
     }
 
-    function transferPrize() public onlyWinner {
+    function transferPrize() public payable onlyWinner {
         require(prize > 0, "No prize to transfer");
+        require(commission > 0, "zero platform fees");
          TVolume+=prize;
-        payable(winners[winners.length - 1]).transfer(prize);
+         commissionvalue = (prize * commission) / 100;
+         uint actualprize = prize - commissionvalue;
+
+        payable(winners[winners.length - 1]).transfer(actualprize);
        
         TX++;
         prize = 0; // Reset prize after transfer
+        payable(manager).transfer(commissionvalue);
         
     }
+
 function viewPlayers() public view returns (address[] memory) {
         return players;
     }

@@ -22,14 +22,14 @@ const router = createBrowserRouter([
     path: '/roadmap',
     element: <Roadmap />,
   },
-  {
-    path: '/guardedroute',
-    element: (
-      <GuardedRoute element={<AdminPage />}>
-        <AdminPage />
-      </GuardedRoute>
-    ),
-  },
+  // {
+  //   path: '/guardedroute',
+  //   element: (
+  //     <GuardedRoute element={<AdminPage />}>
+  //       <AdminPage />
+  //     </GuardedRoute>
+  //   ),
+  // },
   {
     path: '/admin',
     element: <AdminPage />,

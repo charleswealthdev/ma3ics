@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Ma3icsLOGO from '../images/MA331.png'
 
 const Navigation = () => {
   const [isMenuOpen, setMenuOpen] = useState(false);
@@ -10,7 +11,7 @@ const Navigation = () => {
 
   return (
     <div className="flex items-center justify-between p-4">
-      <h1 className="text-4xl font-bold text-purple-800">MA3ICS</h1>
+      <img  src={Ma3icsLOGO} width="100px" height="100px"/>
 
       <div className="md:hidden">
         {/* Mobile Menu Button */}

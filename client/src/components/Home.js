@@ -2,27 +2,25 @@ import Web3 from 'web3';
 import { useState, useEffect,useRef } from 'react';
 import Lottery from '../contracts/Lottery.json';
 
-import polygonlogo from "../images/polygon-logo.png";
-import { Link,useNavigate} from 'react-router-dom';
-import Navigation from './Navigation';
+import polygonLogo from "../images/polygon-logo.png";
 import AdminPage from './Adminpage';
 import { isAddress } from 'web3-validator';
 
+import YourStatsBoard from './YourStatsBoard';
+import YourComponent from './YourComponent';
+import TaskZone from './Taskzone';
 function Home() {
 
     const [state, setState] = useState({ web3: null, contract: null });
-    const [web3, setWeb3] = useState();
+    const [web3,setWeb3] = useState()
     const [address, setAddress] = useState();
     const [players, setPlayers] = useState([]);
+    const [leaderboardlist,setLeaderboard] = useState([])
     const [balance, setBalance] = useState();
     const [winner, setWinnerAddress] = useState('');
     const [prize, setWinnerPrize] = useState('');
     const [isOwner,setIsOwner] = useState(false);
     const [owner,setOwner] = useState("0x346507Ba876a2Ac1b5174D5e296193f201a343AC")
-    // const [countdown, setCountdown] = useState(() => {
-    //    localStorage.getItem('countdown');
-    //   return defaultDuration;
-    // });
     const [pastWinners, setPastWinners] = useState([]);
     const sliderRef = useRef(null);
     const [tx,setTX]= useState(0);
@@ -32,41 +30,37 @@ function Home() {
       losses: 0,
       timePlayed: 0,
     });
-    // useEffect(() => {
-    //   const storedAddress = localStorage.getItem('walletAddress');
-    //   if (storedAddress) setAddress(storedAddress);
-    // }, []);
 
+
+  const [showPoolZone, setShowPoolZone] = useState(true);
+  const [showStatsZone, setShowStatsZone] = useState(false);
+  const [showTaskZone, setShowTaskZone] = useState(false);
+
+  const togglePoolZone = () => {
+    setShowPoolZone(true);
+    setShowStatsZone(false);
+    setShowTaskZone(false);
+  };
+
+  const toggleStatsZone = () => {
+    setShowPoolZone(false);
+    setShowStatsZone(true);
+    setShowTaskZone(false);
+  };
+
+  const toggleTaskZone = () => {
+    setShowPoolZone(false);
+    setShowStatsZone(false);
+    setShowTaskZone(true);
+  };
+  
     useEffect(()=> {
 const storedWinner = localStorage.getItem('winner')
 if (storedWinner) setWinnerAddress(storedWinner);
     })
   
-    const navigate = useNavigate();
-    // useEffect(() => {
-    //   const provider = new Web3(window.ethereum);
+
   
-    //   async function connectToContract() {
-    //     try {
-    //       const web3 = new Web3(provider);
-    //       const networkId = await web3.eth.net.getId();
-    //       const deployedNetwork = Lottery.networks;
-    //       const deployedId = deployedNetwork[networkId];
-  
-    //       if (deployedId) {
-    //         const contract = new web3.eth.Contract(Lottery.abi, deployedId.address);
-    //         setState({ web3, contract });
-    //       } else {
-    //         console.error("Contract not deployed on the specified network.");
-    //       }
-    //     } catch (error) {
-    //       console.error("Error connecting to the contract:", error);
-    //     }
-    //   }
-  
-    //   if (provider) connectToContract();
-    //   else console.error("Web3 provider not available.");
-    // }, []);
     useEffect(() => {
       // const provider = new Web3.providers.HttpProvider("https://rpc-mumbai.maticvigil.com/");
       const provider = new Web3(window.ethereum)
@@ -101,47 +95,7 @@ if (storedWinner) setWinnerAddress(storedWinner);
     
   
   
-    // const connectWallet = async () => {
-    //   if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
-    //     try {
-    //               await window.ethereum.request({ method: 'eth_requestAccounts' });
-    //       const web3 = new Web3(window.ethereum);
-    //       const accounts = await web3.eth.getAccounts();
-    //       const address = accounts[0];
-  
-    //       localStorage.setItem('walletAddress', address);
-  
-    //       setWeb3(web3);
-    //       setAddress(address);
-    //       setState({ web3: web3, contract: state.contract, address: address });
-    //     } catch (err) {
-    //       console.log(err.message);
-    //     }
-    //   } else {
-    //     setAddress('');
-    //     console.log('Please install MetaMask');
-    //   }
-
-    //   if (address == "0x346507Ba876a2Ac1b5174D5e296193f201a343AC") {
-    //     setIsOwner(true);
-    //   }
-    //   console.log(isOwner)
-    // };
-  
-    // const disconnectWallet = () => {
-    //   localStorage.removeItem('walletAddress');
-  
-    //   setWeb3(null);
-    //   setAddress('');
-    //   setState({ web3: null, contract: state.contract, address: '' });
-    // };  
-  
-    // useEffect(() => {
-    //   const storedAddress = localStorage.getItem('walletAddress');
-    //   if (storedAddress) {
-    //     setAddress(storedAddress);
-    //   }
-    // }, []);
+   
     const connectWallet = async () => {
       if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
         try {
@@ -156,8 +110,9 @@ if (storedWinner) setWinnerAddress(storedWinner);
           setAddress(userAddress);
           setState({ web3: web3Instance, contract: state.contract, address: userAddress });
   
-          if (userAddress === '0x346507Ba876a2Ac1b5174D5e296193f201a343AC') {
+          if (userAddress === owner) {
             setIsOwner(true);
+            // console.log(isOwner)
           }
         } catch (err) {
           console.error(err.message);
@@ -239,29 +194,14 @@ if (storedWinner) setWinnerAddress(storedWinner);
      await getPlayers()
     await getBalance()
      await viewPastWinners()
+
       }
   
     }
     fetchData();   
    },[state.contract,balance,players,pastWinners])
   
-    // const getTVolume = useCallback(async () => {
-    //   try {
-    //     const ToVolume = await state.contract.methods.TVolume().call();
-    //     setTV(Web3.utils.fromWei(parseInt(ToVolume, 10), 'ether'));
-    //   } catch (error) {
-    //     console.error('Error fetching total volume:', error);
-    //   }
-    // }, [state.contract,totalVolume]);
-  
-    // const getTX = useCallback(async () => {
-    //   try {
-    //     const TX = await state.contract.methods.TX().call();
-    //     setTX(parseInt(TX, 10));
-    //   } catch (error) {
-    //     console.error('Error fetching total transactions:', error);
-    //   }
-    // }, [state.contract,tx]);
+   
   
     const getPlayers = async () => {
       try {
@@ -297,6 +237,7 @@ if (storedWinner) setWinnerAddress(storedWinner);
  await userstats()
  await  getTVolume()
  await getTX()
+
   }
 
   else {
@@ -314,7 +255,21 @@ if (storedWinner) setWinnerAddress(storedWinner);
         timePlayed: parseInt(stats[2], 10),
       });
     }
-    
+
+    const getLeaderBoard = async () => {
+      try {
+          const leaderboardEntry = await state.contract.methods.getLeaderboard().call();
+          const formattedLeaderboard = leaderboardEntry.map(entry => ({
+              playerAddress: entry[0],
+              wins: parseInt(entry[1], 10),
+          }));
+          setLeaderboard(formattedLeaderboard);
+           console.log(leaderboardlist,formattedLeaderboard) 
+      } catch (error) {
+          console.error("Error fetching leaderboard:", error);
+      }
+  };
+  
     const getTVolume = async () => {
       try{
         const ToVolume = await state.contract.methods.TVolume().call();
@@ -339,7 +294,7 @@ if (storedWinner) setWinnerAddress(storedWinner);
         if (contract) {
           await contract.methods.joinGame().send({
             from: address,
-            value: web3.utils.toWei("0.05", "ether"),
+            value: web3.utils.toWei("0.1", "ether"),
             gas: 200000, // Adjust gas limit
           });
   
@@ -368,13 +323,13 @@ if (storedWinner) setWinnerAddress(storedWinner);
             gas: 5000000,
           });
   
-          console.log('Pick Winner Transaction:', pickWinnerTx);
   
           const winnerEvent = pickWinnerTx.events.WinnerPicked;
           if (winnerEvent) {
             setWinnerAddress(winnerEvent.returnValues.winner);
             setWinnerPrize(Web3.utils.fromWei(winnerEvent.returnValues.prize, 'ether'));
             localStorage.setItem("winner",winnerEvent.returnValues.winner);
+            return winnerEvent.returnValues.winner;
           }
         }
       } catch (error) {
@@ -388,7 +343,23 @@ if (storedWinner) setWinnerAddress(storedWinner);
       // fetchData();
       // fetchGameStats()
     };
-  
+const setcommission = async () => {
+  try {
+    const hello = await state.contract.methods.setcommission(5).send({ from: address });
+     return 
+  } catch (error) {
+    console.error('Error setting commission:', error);
+  }
+}  
+
+const ownerbalance = async () => {
+  try {
+   const ownerbal= await state.contract.methods.OwnerBalance().call({from:address });
+  console.log(parseInt(ownerbal))
+  } catch (error) {
+    console.error('Error checking balance:', error);
+  }
+}  
     const claimPrize = async () => {
       try {
         await state.contract.methods.transferPrize().send({ from: address });
@@ -408,17 +379,7 @@ if (storedWinner) setWinnerAddress(storedWinner);
       window.location.reload();
     };
   
-    const slideLeft = () => {
-      if (sliderRef.current) {
-        sliderRef.current.scrollLeft -= 200;
-      }
-    };
-  
-    const slideRight = () => {
-      if (sliderRef.current) {
-        sliderRef.current.scrollLeft += 200;
-      }
-    };
+   
   
 
 return(
@@ -426,12 +387,6 @@ return(
 <div className="App min-h-screen bg-white">
 
       <div className="bg-white  rounded shadow-md ">
-
-    
-       
-        
-
-{/* <ToggleCards/> */}
   
  <div> <button
     onClick={address ? disconnectWallet : connectWallet}
@@ -445,50 +400,64 @@ return(
     </p>
   )}
   {!address && <p className="ml-1 text-gray-600">Not connected</p>}</div>
-        <div className="mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+
+
+   <div className="bg-gradient-to-r from-blue-800 to-purple-800 text-white p-8 w-full">
         <div className="flex flex-col items-center">
-        <img src={polygonlogo} alt="Logo" className="w-12 h-12 mb-4" />
+          <img src={polygonLogo} alt="Logo" className="w-16 h-16" />
+          <h2 className="text-3xl font-semibold mt-2">Welcome to M3 Pool!</h2>
         </div>
-          <div className="bg-gray-200 text-gray-700 px-6 py-4">
-            <h2 className="text-center font-semibold">TOTAL POOL</h2>
-          </div>
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-center space-x-2">
-              <span className="text-4xl font-bold text-blue-500">💰</span>
-              <p className="text-3xl font-bold text-gray-800">{balance} MATIC</p>
-            </div>
-          </div>
-        </div>
-
-        <br />
-      
-        <button
-          onClick={joinGame}
-          disabled={!address}
-          className="mt-6 bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 focus:outline-none transition-all text-sm sm:text-base mx-auto block"
-        >
-          Join Pool
-        </button>
-      <div className="max-w-md mx-auto p-3 bg-white shadow-lg rounded-md">
-      <h1 className="text-2xl font-bold text-center mb-4">🎮  {players.length} Players are in the pool</h1>
-      <div className="space-y-2">
-        {players.map((player, index) => (
-          <div key={index} className="flex items-center justify-between bg-gray-100 p-2 rounded-md">
-            <p className="text-sm sm:text-base">{player}</p>
-          
-          </div>
-        ))}
       </div>
-    </div>
+     
+ <div className="flex mt-4 space-x-4 w-full">
+          <button
+            onClick={togglePoolZone}
+            className={`flex-1 bg-blue-500 text-white px-3 py-1 rounded-full hover:bg-blue-600 focus:outline-none transition-all text-sm sm:text-base ${
+              showPoolZone ? "bg-blue-600" : ""
+            }`}
+          >
+            Pool Zone
+          </button>
+          <button
+            onClick={toggleStatsZone}
+            className={`flex-1 bg-blue-500 text-white px-3 py-1 rounded-full hover:bg-blue-600 focus:outline-none transition-all text-sm sm:text-base ${
+              showPoolZone ? "" : "bg-blue-600"
+            }`}
+          >
+            Stats Zone
+          </button>
 
-      {/* <p>Countdown: {formatTime(countdown)} </p>  */}
-      {/* {countdown} */}
+          <button
+            onClick={toggleTaskZone}
+            className={`flex-1 bg-blue-500 text-white px-3 py-1 rounded-full hover:bg-blue-600 focus:outline-none transition-all text-sm sm:text-base ${
+              showTaskZone ? "bg-blue-600" : ""
+            }`}
+          >
+            Task Zone
+          </button>
+        </div>
+
+<div className="min-h-screen bg-white  items-center justify-center">
+  
+      <div className=" items-center w-full">
+        <div className=" p-4 bg-gray-100 rounded-md  w-full">
+        {showPoolZone &&  <YourComponent balance={balance} joinGame={joinGame} address={address} players={players}/>} {/* Your Pool Zone content */}
+        {showStatsZone && <YourStatsBoard userStats={userStats} totalVolume={totalVolume} tx={tx} leaderdoardlist={leaderboardlist} getLeaderBoard={getLeaderBoard} players={players} pastWinners={pastWinners}/>} {/* Your Stats Zone content */}
+        {showTaskZone && <TaskZone />}
+
+      
+        </div>
+        
+    </div>
+   
+      </div>
+
       <div>
         <div>
         <div>
               {prize !== null ? (
                 <p className='text-center'>
-                  {prize ? `${prize} Matic was paid to ${winner}` : 'No winner yet'}
+                  {prize ? `${prize} Matic was paid to ${winner}` : ' ongoing round'}
                 </p>
               ) : (
                 <div className="flex items-center justify-center">
@@ -499,31 +468,8 @@ return(
             </div>
         </div>
       </div>
-    
-      <div className="max-w-md mx-auto p-4 bg-white shadow-md rounded-md relative overflow-hidden">
-          <h1 className="text-2xl font-bold text-center mb-4">🏆 Winners ({pastWinners.length})</h1>
-          <div ref={sliderRef} className="flex space-x-4 overflow-x-auto scrollbar-hide">
-            {pastWinners.map((pastWinner, index) => (
-              <div key={index} className="flex-none w-48 p-4 bg-gray-100 rounded-md shadow-md">
-                <p className="text-sm font-semibold text-gray-800">{pastWinner}</p>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={slideLeft}
-            className="absolute top-1/2 left-0 transform -translate-y-1/2 bg-gray-500 text-white p-2 rounded-full focus:outline-none"
-          >
-            &lt;
-          </button>
-          <button
-            onClick={slideRight}
-            className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-gray-500 text-white p-2 rounded-full focus:outline-none"
-          >
-            &gt;
-          </button>
-        </div>
+ 
 
-        {/* <button onClick={pickWinner}>winner</button> */}
         <br />
         {winner ? (
           <button
@@ -540,47 +486,10 @@ return(
 
        
 
-     
-<div className="bg-gray-100 text-gray-800 p-8 rounded-md shadow-lg">
-  <h1 className="text-3xl font-bold mb-4 text-center">STATS BOARD</h1>
-  <div className="grid grid-cols-2 gap-4">
-    <div className="bg-blue-500 p-6 rounded-md shadow-md hover:bg-blue-600 transition-all">
-      <p className="text-xl font-semibold mb-2">Wins</p>
-      <p className="text-2xl">{userStats.wins}</p>
-    </div>
-    <div className="bg-red-500 p-6 rounded-md shadow-md hover:bg-red-600 transition-all">
-      <p className="text-xl font-semibold mb-2">Losses</p>
-      <p className="text-2xl">{userStats.losses}</p>
-    </div>
-    <div className="bg-green-500 p-6 rounded-md shadow-md hover:bg-green-600 transition-all">
-      <p className="text-xl font-semibold mb-2">Time Played</p>
-      <p className="text-2xl">{userStats.timePlayed}</p>
-    </div>
-    <div className="bg-yellow-500 p-6 rounded-md shadow-md hover:bg-yellow-600 transition-all">
-      <p className="text-xl font-semibold mb-2">Total Volume</p>
-      <p className="text-2xl">{totalVolume} Matic</p>
-    </div>
-    <div className="bg-purple-500 p-6 rounded-md shadow-md hover:bg-purple-600 transition-all">
-      <p className="text-xl font-semibold mb-2">Total Block TX</p>
-      <p className="text-2xl">{tx}</p>
-    </div>
-  </div>
-</div>
+    
 
+     {isOwner? <AdminPage pickWinner={pickWinner} setcommission={setcommission} isOwner={isOwner}/> :""}
 
-     {/* <div>{nooftimesplayed}</div> */}
-     { owner===address? <button onClick={pickWinner}> Pick</button> : ""}
-     <div className="flex items-center justify-center bg-gray-100">
-          <div className="bg-yellow-200 border-2 border-brown-700 p-8 rounded-lg max-w-md w-full overflow-hidden relative">
-            <h1 className="text-2xl font-bold text-brown-700 mb-4 text-center">Participation Manual</h1>
-            <div className="text-brown-800 text-justify">
-              <p className="mb-4">Deposit some Matic into your metamask, Connect your wallet, make sure you are on the polygon blockchain</p>
-              <p className="mb-4">Join the pool by adding Liquidity to the pool (0.05 Matic)</p>
-              <p className="mb-4">After a winner is picked by the system, the winner claims LP</p>
-            </div>
-            <div className="absolute top-0 left-1/2 w-px h-full bg-brown-700 transform -translate-x-1/2"></div>
-          </div>
-        </div>
       </div>
     </div>
    
